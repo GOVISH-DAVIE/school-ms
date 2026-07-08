@@ -26,7 +26,8 @@
      <b>{{ get_phrase('Subject') }}:</b> {{ $sub->name ?? '-' }} &nbsp;|&nbsp;
      <b>{{ get_phrase('Questions') }}:</b> {{ $links->count() }} &nbsp;|&nbsp;
      <b>{{ get_phrase('Total marks') }}:</b> {{ $quiz->total_marks }} &nbsp;|&nbsp;
-     <b>{{ get_phrase('Deadline') }}:</b> {{ $quiz->deadline ? date('d M Y', $quiz->deadline) : '—' }}</p>
+     <b>{{ get_phrase('Time limit') }}:</b> {{ $quiz->duration_minutes ? $quiz->duration_minutes.' '.get_phrase('min') : '—' }} &nbsp;|&nbsp;
+     <b>{{ get_phrase('Deadline') }}:</b> {{ $quiz->deadline ? date('d M Y, g:i A', $quiz->deadline) : '—' }}</p>
 </div></div></div>
 
 <div class="row"><div class="col-12"><div class="eSection-wrap">
