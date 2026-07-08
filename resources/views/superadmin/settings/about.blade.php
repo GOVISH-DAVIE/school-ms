@@ -27,7 +27,7 @@
                 <p class="border-bottom mb-2 pb-2 text-13px">
                   <i class="bi bi-arrow-right-square me-3"></i> {{ get_phrase('Check update') }}
                   <span class="float-end">
-                      <a class="about-sc-one" href="https://codecanyon.net/user/creativeitem/portfolio"
+                      <a class="about-sc-one" href="https://algotech.co.ke"
                         target="_blank">
                           <i class="bi bi-telegram"></i>
                             {{ get_phrase('Check update') }}
@@ -64,7 +64,7 @@
                   <span class="float-end">
                     <?php if (strtolower($application_details['purchase_code_status']) == 'expired'): ?>
                       <span class="badge bg-danger float-end mt-1 text-capitalize">{{ $application_details['purchase_code_status'] }}</span>
-                      <a href="https://codecanyon.net/user/creativeitem/portfolio" target="_blank" class="btn btn-success float-end me-2 py-0 text-13px">{{ get_phrase('Renew support') }}</a>
+                      <a href="https://algotech.co.ke" target="_blank" class="btn btn-success float-end me-2 py-0 text-13px">{{ get_phrase('Renew support') }}</a>
                     <?php elseif (strtolower($application_details['purchase_code_status']) == 'valid'): ?>
                       <span class="badge bg-success text-capitalize">{{ $application_details['purchase_code_status'] }}</span>
                     <?php else: ?>
@@ -91,7 +91,7 @@
                 </p>
                 <p class="border-bottom mb-2 pb-2 text-13px">
                   <i class="bi bi-arrow-right-square me-3"></i> {{ get_phrase('Get customer support') }}
-                  <span class="float-end"><a class="about-sc-one" href="http://support.creativeitem.com" target="_blank"> <i class="bi bi-telegram"></i> {{ get_phrase('Customer support') }} </a> </span>
+                  <span class="float-end"><a class="about-sc-one" href="https://algotech.co.ke" target="_blank"> <i class="bi bi-telegram"></i> {{ get_phrase('Customer support') }} </a> </span>
                 </p>
             </div>
         </div>
