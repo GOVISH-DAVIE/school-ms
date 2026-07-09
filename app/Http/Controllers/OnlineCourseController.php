@@ -474,6 +474,12 @@ class OnlineCourseController extends Controller
         $course = Course::where('id', $id)->where('status', 'published')->firstOrFail();
         abort_if(!$enroll || $enroll->class_id != $course->class_id, 403);
 
+        // Blocked if the teacher removed this student from the course.
+        $removed = CourseRemoval::where('course_id', $course->id)
+            ->where('student_id', auth()->user()->id)
+            ->where('status', 'removed')->exists();
+        abort_if($removed, 403, get_phrase('You have been removed from this course.'));
+
         $course->load('topics.lessons.materials', 'sessions');
 
         // tie-in: syllabus + assignments for this class+subject (student's section)

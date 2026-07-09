@@ -159,9 +159,10 @@
     <div class="kh-card">
       <div class="d-flex justify-content-between align-items-center flex-wrap mb-2" style="gap:10px;">
         <h5 class="mb-0"><i class="bi bi-people-fill me-2" style="color:#00955f;"></i>{{ get_phrase('Enrolled students') }}
-          <span class="badge bg-primary">{{ $students->count() }}</span></h5>
+          <span class="badge bg-primary">{{ $students->count() }}</span>
+          @if($removedCount)<span class="badge bg-danger">{{ $removedCount }} {{ get_phrase('removed') }}</span>@endif</h5>
         <span class="text-muted" style="font-size:12.5px;">
-          {{ get_phrase('Everyone in') }} <b>{{ $className ?? '' }}</b> {{ get_phrase('is enrolled. Manage the roster in Admissions.') }}
+          {{ get_phrase('Everyone in') }} <b>{{ $className ?? '' }}</b> {{ get_phrase('is enrolled. Remove individuals from this course below.') }}
         </span>
       </div>
       @if($students->count())
@@ -169,16 +170,16 @@
           <table class="table eTable eTable-2 mb-0" style="font-size:13.5px;">
             <thead><tr>
               <th>#</th><th>{{ get_phrase('Student') }}</th><th>{{ get_phrase('Section') }}</th>
-              <th>{{ get_phrase('Email') }}</th><th style="min-width:150px;">{{ get_phrase('Coursework progress') }}</th>
+              <th style="min-width:150px;">{{ get_phrase('Coursework progress') }}</th>
+              <th>{{ get_phrase('Status') }}</th><th class="text-end">{{ get_phrase('Action') }}</th>
             </tr></thead>
             <tbody>
               @foreach($students as $i => $s)
                 @php $pct = $s->total_coursework ? round($s->submitted_count / $s->total_coursework * 100) : 0; @endphp
-                <tr>
+                <tr @if($s->is_removed) style="background:#fff6f5;" @endif>
                   <td>{{ $i+1 }}</td>
-                  <td style="font-weight:600;">{{ $s->name }}</td>
+                  <td style="font-weight:600;">{{ $s->name }}<br><small class="text-muted" style="font-weight:400;">{{ $s->email }}</small></td>
                   <td><span class="badge bg-secondary">{{ $s->section_name }}</span></td>
-                  <td class="text-muted">{{ $s->email }}</td>
                   <td>
                     @if($s->total_coursework)
                       <div class="d-flex align-items-center" style="gap:8px;">
@@ -187,6 +188,28 @@
                       </div>
                     @else
                       <small class="text-muted">{{ get_phrase('No coursework yet') }}</small>
+                    @endif
+                  </td>
+                  <td>
+                    @if($s->is_removed)
+                      <span class="badge bg-danger" title="{{ $s->removal_reason }}">{{ get_phrase('Removed') }}</span>
+                      @if($s->removal_reason)<div class="text-muted" style="font-size:11.5px;max-width:180px;">“{{ $s->removal_reason }}”</div>@endif
+                    @else
+                      <span class="badge bg-success">{{ get_phrase('Active') }}</span>
+                    @endif
+                  </td>
+                  <td class="text-end">
+                    @if($s->is_removed)
+                      <form method="POST" action="{{ route('teacher.addons.course.student.readmit') }}" style="display:inline;">
+                        @csrf
+                        <input type="hidden" name="course_id" value="{{ $course->id }}">
+                        <input type="hidden" name="student_id" value="{{ $s->id }}">
+                        <button class="eBtn btn-success" type="submit"><i class="bi bi-arrow-counterclockwise"></i> {{ get_phrase('Re-admit') }}</button>
+                      </form>
+                    @else
+                      <button class="eBtn btn-danger" type="button"
+                        onclick="khRemove({{ $course->id }}, {{ $s->id }}, '{{ addslashes($s->name) }}')">
+                        <i class="bi bi-person-dash"></i> {{ get_phrase('Remove') }}</button>
                     @endif
                   </td>
                 </tr>
@@ -206,7 +229,7 @@
       <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap:10px;">
         <h5 class="mb-0"><i class="bi bi-journal-check me-2" style="color:#00955f;"></i>{{ get_phrase('Coursework & assignments') }}</h5>
         <a class="eBtn btn-primary" href="javascript:;"
-           onclick="rightModal('{{ route('teacher.assignment.create_modal') }}', '{{ get_phrase('Add coursework') }}')">
+           onclick="rightModal('{{ route('teacher.addons.course.coursework.create_modal', $course->id) }}', '{{ get_phrase('Add coursework') }}')">
            <i class="bi bi-plus"></i> {{ get_phrase('Add coursework') }}</a>
       </div>
       <p class="text-muted" style="font-size:12.5px;margin-top:-8px;">

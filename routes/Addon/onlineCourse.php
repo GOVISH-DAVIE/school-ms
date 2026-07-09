@@ -34,6 +34,12 @@ Route::controller(OnlineCourseController::class)->group(function () {
         Route::post('teacher/addons/courses/session/store', 'sessionStore')->name('teacher.addons.course.session.store');
         Route::post('teacher/addons/courses/session/cancel/{id}', 'sessionCancel')->name('teacher.addons.course.session.cancel');
         Route::post('teacher/addons/courses/session/delete/{id}', 'sessionDelete')->name('teacher.addons.course.session.delete');
+
+        Route::get('teacher/addons/courses/coursework/create-modal/{course_id}', 'courseworkCreateModal')->name('teacher.addons.course.coursework.create_modal');
+        Route::post('teacher/addons/courses/coursework/store', 'courseworkStore')->name('teacher.addons.course.coursework.store');
+
+        Route::post('teacher/addons/courses/student/remove', 'studentRemove')->name('teacher.addons.course.student.remove');
+        Route::post('teacher/addons/courses/student/readmit', 'studentReadmit')->name('teacher.addons.course.student.readmit');
     });
 
     // ---- Student ----
