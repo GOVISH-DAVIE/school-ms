@@ -14,10 +14,12 @@ class KohaController extends Controller
         $q = trim((string) $request->get('q', ''));
         $results = [];
         $configured = $koha->isConfigured();
+        $browse = ($q === '');
 
-        if ($configured && $q !== '') {
-            $res = $koha->searchBiblios($q, 1, 30);
-            foreach ($res['items'] as $b) {
+        if ($configured) {
+            // no query → browse the whole catalog; otherwise search
+            $items = $q !== '' ? $koha->searchBiblios($q, 1, 50)['items'] : $koha->biblios(1, 60);
+            foreach ($items as $b) {
                 $results[] = [
                     'biblio_id' => $b['biblio_id'] ?? null,
                     'title'     => $b['title'] ?? '—',
@@ -31,6 +33,7 @@ class KohaController extends Controller
         return view('koha.catalog', [
             'q'          => $q,
             'results'    => $results,
+            'browse'     => $browse,
             'configured' => $configured,
             'opac'       => $koha->opacUrl(),
         ]);
@@ -56,6 +59,35 @@ class KohaController extends Controller
                 'branch' => get_settings('koha_library_branch'),
             ],
             'stats' => $stats,
+        ]);
+    }
+
+    /* ---------------- book detail + borrowing history ---------------- */
+    public function bookHistory($id, Koha $koha)
+    {
+        $book = \DB::table('books')->where('id', $id)->first();
+        abort_if(!$book, 404);
+
+        $history = \DB::table('book_issues as bi')
+            ->leftJoin('users as u', 'u.id', '=', 'bi.student_id')
+            ->leftJoin('classes as c', 'c.id', '=', 'bi.class_id')
+            ->where('bi.book_id', $id)
+            ->orderByDesc('bi.id')
+            ->get(['bi.issue_date', 'bi.due_date', 'bi.status', 'bi.source',
+                   'u.name as borrower', 'u.code as borrower_code', 'c.name as class_name']);
+
+        // live availability from Koha holdings, if linked
+        $total = $available = null;
+        if ($book->koha_biblionumber && $koha->isConfigured()) {
+            $items = $koha->biblioItems($book->koha_biblionumber);
+            $total = count($items);
+            $onLoan = collect($items)->filter(fn ($it) => !empty($it['checked_out_date']))->count();
+            $available = max(0, $total - $onLoan);
+        }
+
+        return view('koha.book_history', [
+            'book' => $book, 'history' => $history, 'total' => $total, 'available' => $available,
+            'opac' => $book->koha_biblionumber ? $koha->opacBiblioUrl($book->koha_biblionumber) : null,
         ]);
     }
 

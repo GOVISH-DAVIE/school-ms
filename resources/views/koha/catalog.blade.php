@@ -42,19 +42,20 @@
   <form method="GET" class="kh-search">
     <input type="text" name="q" value="{{ $q }}" class="form-control eForm-control" placeholder="{{ get_phrase('Title, author, keyword…') }}" autofocus>
     <button class="eBtn btn-primary" type="submit"><i class="bi bi-search"></i> {{ get_phrase('Search') }}</button>
+    @if(!$browse)<a class="eBtn btn-secondary" href="{{ url()->current() }}"><i class="bi bi-list-ul"></i> {{ get_phrase('All titles') }}</a>@endif
   </form>
 
   @if(!$configured)
     <p class="text-muted mt-3">{{ get_phrase('The library catalog is not connected yet.') }}</p>
-  @elseif($q === '')
-    <p class="text-muted mt-3">{{ get_phrase('Type a title, author or keyword to search the catalog.') }}</p>
   @elseif(count($results) === 0)
     <div class="text-center text-muted py-4">
       <i class="bi bi-journal-x" style="font-size:34px;opacity:.4;"></i>
-      <p class="mb-0 mt-2">{{ get_phrase('No records found for') }} “{{ $q }}”.</p>
+      <p class="mb-0 mt-2">{{ $browse ? get_phrase('The catalog is empty.') : get_phrase('No records found for').' “'.$q.'”.' }}</p>
     </div>
   @else
-    <p class="text-muted mt-2 mb-2">{{ count($results) }} {{ get_phrase('result(s) for') }} “{{ $q }}”</p>
+    <p class="text-muted mt-2 mb-2">
+      @if($browse){{ get_phrase('All titles in the catalog') }} ({{ count($results) }})@else{{ count($results) }} {{ get_phrase('result(s) for') }} “{{ $q }}”@endif
+    </p>
     <div class="table-responsive">
       <table class="table eTable eTable-2 mb-0" style="font-size:13.5px;">
         <thead><tr>

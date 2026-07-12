@@ -1093,6 +1093,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('librarian/library/dashboard', [KohaController::class, 'librarianDashboard'])->middleware('librarian')->name('librarian.koha.dashboard');
     Route::get('librarian/library/patron', [KohaController::class, 'patronLookup'])->middleware('librarian')->name('librarian.koha.patron');
     Route::post('librarian/library/issue', [KohaController::class, 'doIssue'])->middleware('librarian')->name('librarian.koha.issue');
+    Route::get('librarian/book/history/{id}', [KohaController::class, 'bookHistory'])->middleware('librarian')->name('librarian.book.history');
+    Route::get('admin/book/history/{id}', [KohaController::class, 'bookHistory'])->middleware('admin')->name('admin.book.history');
     Route::get('librarian/koha', [KohaController::class, 'librarianPanel'])->middleware('librarian')->name('librarian.koha.panel');
     Route::post('librarian/koha/sync', [KohaController::class, 'runSync'])->middleware('librarian')->name('librarian.koha.sync');
     Route::get('admin/library/catalog',     [KohaController::class, 'catalog'])->middleware('admin')->name('admin.koha.catalog');
