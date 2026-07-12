@@ -3,7 +3,7 @@
   $nav = [7=>'student.navigation', 3=>'teacher.navigation'][$rid] ?? 'student.navigation';
   $catalogRoute = [7=>'student.koha.catalog', 3=>'teacher.koha.catalog'][$rid] ?? 'student.koha.catalog';
   $cur = get_settings('system_currency') ?: 'KES';
-  $finesTotal = collect($fines)->sum(fn($f) => (float)($f['amount_outstanding'] ?? 0));
+  $finesTotal = collect($fines)->sum(fn($f) => (float)($f['amount'] ?? 0));
 @endphp
 @extends($nav)
 
@@ -33,15 +33,14 @@
     <p class="text-muted mb-0">{{ get_phrase('The library is not connected yet.') }}</p>
   @elseif(count($loans))
     <div class="table-responsive"><table class="table eTable eTable-2 mb-0" style="font-size:13.5px;">
-      <thead><tr><th>{{ get_phrase('Title') }}</th><th>{{ get_phrase('Barcode') }}</th><th>{{ get_phrase('Borrowed') }}</th><th>{{ get_phrase('Due') }}</th><th>{{ get_phrase('Status') }}</th></tr></thead>
+      <thead><tr><th>{{ get_phrase('Title') }}</th><th>{{ get_phrase('Borrowed') }}</th><th>{{ get_phrase('Due') }}</th><th>{{ get_phrase('Status') }}</th></tr></thead>
       <tbody>
         @foreach($loans as $l)
-          @php $due = isset($l['due_date']) ? strtotime($l['due_date']) : null; $overdue = $due && $due < time(); @endphp
+          @php $overdue = !empty($l['due']) && $l['due'] < time(); @endphp
           <tr>
             <td style="font-weight:600;">{{ $l['title'] ?? '—' }}</td>
-            <td>{{ $l['barcode'] ?? '—' }}</td>
-            <td>{{ isset($l['checkout_date']) ? date('d M Y', strtotime($l['checkout_date'])) : '—' }}</td>
-            <td>{{ $due ? date('d M Y', $due) : '—' }}</td>
+            <td>{{ !empty($l['issued']) ? date('d M Y', $l['issued']) : '—' }}</td>
+            <td>{{ !empty($l['due']) ? date('d M Y', $l['due']) : '—' }}</td>
             <td>@if($overdue)<span class="eBadge ebg-soft-danger">{{ get_phrase('Overdue') }}</span>@else<span class="eBadge ebg-soft-warning">{{ get_phrase('On loan') }}</span>@endif</td>
           </tr>
         @endforeach
@@ -60,7 +59,7 @@
       <tbody>
         @foreach($fines as $f)
           <tr><td>{{ $f['description'] ?: get_phrase('Library fine') }}</td>
-              <td class="text-end" style="font-weight:700;color:#c0392b;">{{ $cur }} {{ number_format($f['amount_outstanding'] ?? 0, 2) }}</td></tr>
+              <td class="text-end" style="font-weight:700;color:#c0392b;">{{ $cur }} {{ number_format($f['amount'] ?? 0, 2) }}</td></tr>
         @endforeach
       </tbody>
     </table></div>

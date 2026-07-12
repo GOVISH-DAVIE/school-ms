@@ -23,7 +23,7 @@
   <div class="eSection-wrap"><p class="text-muted mb-0">{{ get_phrase('No children linked to your account.') }}</p></div>
 @else
   @foreach($kids as $k)
-    @php $finesTotal = collect($k['fines'])->sum(fn($f)=>(float)($f['amount_outstanding'] ?? 0)); @endphp
+    @php $finesTotal = collect($k['fines'])->sum(fn($f)=>(float)($f['amount'] ?? 0)); @endphp
     <div class="eSection-wrap mb-3">
       <div class="pl-child">
         <div><span class="nm">{{ $k['child']->name }}</span>
@@ -39,11 +39,11 @@
           <thead><tr><th>{{ get_phrase('Title') }}</th><th>{{ get_phrase('Borrowed') }}</th><th>{{ get_phrase('Due') }}</th><th>{{ get_phrase('Status') }}</th></tr></thead>
           <tbody>
             @foreach($k['loans'] as $l)
-              @php $due = isset($l['due_date']) ? strtotime($l['due_date']) : null; $overdue = $due && $due < time(); @endphp
+              @php $overdue = !empty($l['due']) && $l['due'] < time(); @endphp
               <tr>
                 <td style="font-weight:600;">{{ $l['title'] ?? '—' }}</td>
-                <td>{{ isset($l['checkout_date']) ? date('d M Y', strtotime($l['checkout_date'])) : '—' }}</td>
-                <td>{{ $due ? date('d M Y', $due) : '—' }}</td>
+                <td>{{ !empty($l['issued']) ? date('d M Y', $l['issued']) : '—' }}</td>
+                <td>{{ !empty($l['due']) ? date('d M Y', $l['due']) : '—' }}</td>
                 <td>@if($overdue)<span class="eBadge ebg-soft-danger">{{ get_phrase('Overdue') }}</span>@else<span class="eBadge ebg-soft-warning">{{ get_phrase('On loan') }}</span>@endif</td>
               </tr>
             @endforeach

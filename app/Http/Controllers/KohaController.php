@@ -62,28 +62,32 @@ class KohaController extends Controller
         ]);
     }
 
-    /* ---------------- shared: a user's Koha loans + fines ---------------- */
-    private function patronLoansAndFines($userId, Koha $koha): array
+    /* ---------------- shared: a user's loans + fines (from the local mirror, fast) ---------------- */
+    private function patronLoansAndFines($userId): array
     {
-        $map = \DB::table('koha_borrower_map')->where('user_id', $userId)->first();
-        $loans = $fines = [];
-        if ($map && $map->koha_borrowernumber && $koha->isConfigured()) {
-            $pid = $map->koha_borrowernumber;
-            foreach ($koha->checkouts($pid) as $co) {
-                $item = $koha->getItem($co['item_id'] ?? 0);
-                $co['barcode'] = $item['external_id'] ?? null;
-                $co['title']   = optional(\DB::table('books')->where('koha_biblionumber', $item['biblio_id'] ?? 0)->first())->name;
-                $loans[] = $co;
-            }
-            $fines = ($koha->account($pid)['outstanding_debits']['lines'] ?? []);
-        }
+        $loans = \DB::table('book_issues as bi')
+            ->join('books as b', 'b.id', '=', 'bi.book_id')
+            ->where('bi.student_id', $userId)->where('bi.status', 0)
+            ->orderByDesc('bi.id')
+            ->get(['b.name as title', 'bi.issue_date', 'bi.due_date'])
+            ->map(fn ($r) => [
+                'title'  => $r->title,
+                'issued' => $r->issue_date ? (int) $r->issue_date : null,
+                'due'    => $r->due_date ? (int) $r->due_date : null,
+            ])->all();
+
+        $fines = \DB::table('invoices')
+            ->where('student_id', $userId)->where('invoice_no', 'like', 'LIB-FINE-%')->where('status', '!=', 'paid')
+            ->get(['title as description', 'balance'])
+            ->map(fn ($r) => ['description' => $r->description, 'amount' => (float) $r->balance])->all();
+
         return [$loans, $fines];
     }
 
     /** Student / teacher self-service: my loans + fines. */
     public function myLibrary(Koha $koha)
     {
-        [$loans, $fines] = $this->patronLoansAndFines(auth()->id(), $koha);
+        [$loans, $fines] = $this->patronLoansAndFines(auth()->id());
         return view('koha.my_library', [
             'loans' => $loans, 'fines' => $fines,
             'configured' => $koha->isConfigured(), 'opac' => $koha->opacUrl(),
@@ -96,7 +100,7 @@ class KohaController extends Controller
         $children = \DB::table('users')->where('parent_id', auth()->id())->where('role_id', 7)->get(['id', 'name', 'code']);
         $kids = [];
         foreach ($children as $c) {
-            [$loans, $fines] = $this->patronLoansAndFines($c->id, $koha);
+            [$loans, $fines] = $this->patronLoansAndFines($c->id);
             $kids[] = ['child' => $c, 'loans' => $loans, 'fines' => $fines];
         }
         return view('koha.parent_library', [
