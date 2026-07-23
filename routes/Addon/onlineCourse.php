@@ -38,6 +38,18 @@ Route::controller(OnlineCourseController::class)->group(function () {
         Route::get('teacher/addons/courses/coursework/create-modal/{course_id}', 'courseworkCreateModal')->name('teacher.addons.course.coursework.create_modal');
         Route::post('teacher/addons/courses/coursework/store', 'courseworkStore')->name('teacher.addons.course.coursework.store');
 
+        Route::get('teacher/addons/courses/cat/create-modal/{course_id}', 'catCreateModal')->name('teacher.addons.course.cat.create_modal');
+        Route::post('teacher/addons/courses/cat/store', 'catStore')->name('teacher.addons.course.cat.store');
+        Route::get('teacher/addons/courses/sitting-cat/create-modal/{course_id}', 'sittingCatCreateModal')->name('teacher.addons.course.sitting_cat.create_modal');
+        Route::post('teacher/addons/courses/sitting-cat/store', 'sittingCatStore')->name('teacher.addons.course.sitting_cat.store');
+        Route::get('teacher/addons/courses/sitting-cat/questions/{id}', 'sittingCatQuestions')->name('teacher.addons.course.sitting_cat.questions');
+        Route::post('teacher/addons/courses/sitting-cat/question/add', 'sittingCatQuestionAdd')->name('teacher.addons.course.sitting_cat.question.add');
+        Route::post('teacher/addons/courses/sitting-cat/question/remove', 'sittingCatQuestionRemove')->name('teacher.addons.course.sitting_cat.question.remove');
+        Route::get('teacher/addons/courses/sitting-cat/paper/{id}', 'sittingCatPaper')->name('teacher.addons.course.sitting_cat.paper');
+        Route::get('teacher/addons/courses/sitting-cat/marks/{id}', 'sittingCatMarks')->name('teacher.addons.course.sitting_cat.marks');
+        Route::post('teacher/addons/courses/sitting-cat/marks/save', 'sittingCatMarksSave')->name('teacher.addons.course.sitting_cat.marks_save');
+        Route::get('teacher/addons/courses/preview/{id}', 'teacherPreview')->name('teacher.addons.course.preview');
+
         Route::post('teacher/addons/courses/student/remove', 'studentRemove')->name('teacher.addons.course.student.remove');
         Route::post('teacher/addons/courses/student/readmit', 'studentReadmit')->name('teacher.addons.course.student.readmit');
     });
